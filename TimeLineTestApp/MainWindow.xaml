@@ -1,0 +1,564 @@
+﻿<Window x:Class="TimeLineTestApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:tt="clr-namespace:TimeLineTool;assembly=TimeLineTool"
+        xmlns:local="clr-namespace:TimeLineTestApp"
+        xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
+        Title="Пример расчета зарплаты: ноябрь 2015 года"
+        Height="650"
+        Width="1220" ResizeMode="NoResize">
+    <Window.Resources>
+        <Color R="255"
+               G="255"
+               B="255"
+               A="180"
+               x:Key="BgColor" />
+        <SolidColorBrush Color="{StaticResource BgColor}"
+                         x:Key="BgBrush" />
+        <SolidColorBrush x:Key="HolydayBrush"
+                         Color="{StaticResource BgColor}" />
+
+        <Style TargetType="{x:Type tt:TimeLineItemControl}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type tt:TimeLineItemControl}">
+                        <Grid>
+                            <Border Background="Blue"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    Opacity="0" />
+                            <ContentPresenter HorizontalAlignment="Stretch"
+                                              VerticalAlignment="Stretch"
+                                              x:Name="PART_ContentHostPART_ContentHost" />
+                            <ContentPresenter HorizontalAlignment="Left"
+                                              VerticalAlignment="Stretch"
+                                              x:Name="PART_LeftIndicator"
+                                              Visibility="Collapsed">
+                                <ContentPresenter.Content>
+                                    <Button />
+                                </ContentPresenter.Content>
+
+                            </ContentPresenter>
+                            <ContentPresenter HorizontalAlignment="Right"
+                                              VerticalAlignment="Stretch"
+                                              x:Name="PART_RightIndicator"
+                                              Visibility="Collapsed">
+                                <ContentPresenter.Content>
+                                    <Button />
+                                </ContentPresenter.Content>
+
+                            </ContentPresenter>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- Стили для TreeView - начало -->
+        <!-- Источник: https://social.msdn.microsoft.com/Forums/vstudio/en-US/84868a50-7046-40f3-82ee-e02dbf9607f2/how-to-change-the-size-of-triangle-shape-next-to-treeviewitem-in-wpf?forum=wpf -->
+        <SolidColorBrush x:Key="GlyphBrush" Color="#444" />
+        <Style x:Key="ExpandCollapseToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid Width="25" Height="25" Background="Transparent">
+                            <Path x:Name="ExpandPath"
+                                  HorizontalAlignment="Left" 
+                                  VerticalAlignment="Center" 
+                                  Margin="1,1,1,1"
+                                  Fill="{StaticResource GlyphBrush}"
+                                  Data="M 4 0 L 15 7 L 4 15 Z"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Data" TargetName="ExpandPath" Value="M 9 0 L 15 15 L 0 15 Z"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="TreeViewItemFocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Border>
+                            <Rectangle Margin="0,0,0,0"
+                                       StrokeThickness="5"
+                                       Stroke="Black"
+                                       StrokeDashArray="1 2"
+                                       Opacity="0"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="{x:Type TreeViewItem}" TargetType="{x:Type TreeViewItem}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="HorizontalContentAlignment" 
+                    Value="{Binding Path=HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
+            <Setter Property="VerticalContentAlignment"
+                    Value="{Binding Path=VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
+            <Setter Property="Padding" Value="1,0,0,0"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="FocusVisualStyle" Value="{StaticResource TreeViewItemFocusVisual}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TreeViewItem}">
+                        <Grid >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition MinWidth="25" Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <!--<RowDefinition Height="Auto"/>-->
+                                <RowDefinition Height="30"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <ToggleButton x:Name="Expander"
+                                          Style="{StaticResource ExpandCollapseToggleStyle}"
+                                          IsChecked="{Binding Path=IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
+                                          ClickMode="Press"/>
+                            <Border Name="Bd"
+                                    Grid.Column="1"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter x:Name="PART_Header"
+                                                  ContentSource="Header"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="Center"/>
+                            </Border>
+                            <ItemsPresenter x:Name="ItemsHost" 
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            Grid.ColumnSpan="2"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsExpanded" Value="false">
+                                <Setter TargetName="ItemsHost" Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                            <Trigger Property="HasItems" Value="false">
+                                <Setter TargetName="Expander" Property="Visibility" Value="Hidden"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="HasHeader" Value="false"/>
+                                    <Condition Property="Width" Value="Auto"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="PART_Header" Property="MinWidth" Value="75"/>
+                            </MultiTrigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="HasHeader" Value="false"/>
+                                    <Condition Property="Height" Value="Auto"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="PART_Header" Property="MinHeight" Value="25"/>
+                            </MultiTrigger>
+                            <Trigger Property="IsSelected" Value="true">
+                                <Setter TargetName="Bd"
+                                        Property="Background"
+                                        Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                <Setter Property="Foreground"
+                                        Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsSelected" Value="true"/>
+                                    <Condition Property="IsSelectionActive" Value="false"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Bd"
+                                        Property="Background"
+                                        Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+                                <Setter Property="Foreground"
+                                        Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                            </MultiTrigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- Стили для TreeView - конец -->
+
+        <DataTemplate x:Key="TimeLineHeaderBlock" 
+                      DataType="{x:Type local:CalendarPeriod}">
+            <Border BorderThickness="1"
+                    BorderBrush="Cyan"
+                    CornerRadius="3"
+                    Margin="0,5,0,5"
+                    Height="20"
+                    Background="{StaticResource BgBrush}"
+                    >
+                <TextBlock x:Name="DateLabel" 
+                           Text="{Binding Path=StartTime, StringFormat=dd}" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center" />
+            </Border>
+
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Path=Data}">
+                    <DataTrigger.Value>True</DataTrigger.Value>
+                    <Setter TargetName="DateLabel" Property="Background" Value="Red"/>
+                    <Setter TargetName="DateLabel" Property="Foreground" Value="White"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+
+        </DataTemplate>
+
+        <DataTemplate x:Key="TimeLineAllMonthBlock" 
+                      DataType="{x:Type tt:TempDataType}">
+            <Border BorderThickness="1"
+                    BorderBrush="Cyan"
+                    CornerRadius="3"
+                    Margin="0,5,0,5"
+                    Height="20"
+                    Background="{StaticResource BgBrush}">
+            </Border>
+        </DataTemplate>
+        
+        <DataTemplate x:Key="HolydayBlock" 
+                      DataType="{x:Type tt:TempDataType}" >
+            <Border BorderThickness="1"
+                    BorderBrush="Green"
+                    CornerRadius="3"
+                    Margin="0,5,0,5"
+                    Height="20"
+                    Background="Red"
+                    >
+                <TextBlock Text="{Binding Path=Description}" Foreground="White" />
+            </Border>
+        </DataTemplate>
+        
+        <DataTemplate x:Key="TimeLineSimpleBlock" 
+                      DataType="{x:Type tt:TempDataType}">
+            <Border BorderThickness="1"
+                    BorderBrush="Green"
+                    CornerRadius="3"
+                    Margin="0,5,0,5"
+                    Height="20"
+                    Background="Blue">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Path=StartTime, StringFormat=HH}" Foreground="White"/>
+                    <TextBlock Text="-" Foreground="White"/>
+                    <TextBlock Text="{Binding Path=EndTime, StringFormat=HH}" Foreground="White"/>
+                </StackPanel>
+                <Border.ToolTip>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Начало: " />
+                            <TextBlock Text="{Binding Path=StartTime, ConverterCulture=ru-RU, StringFormat={}{0:dd.MM.yyyy HH:mm}}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Конец:  " />
+                            <TextBlock Text="{Binding Path=EndTime, ConverterCulture=ru-RU, StringFormat={}{0:dd.MM.yyyy HH:mm}}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Длительность: " />
+                            <TextBlock Text="{Binding Path=Duration}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border.ToolTip>
+            </Border>
+        </DataTemplate>
+        
+        <DataTemplate x:Key="TimeLineSalaryBlock" 
+                      DataType="{x:Type tt:TempDataType}" >
+            <Border BorderThickness="1"
+                    BorderBrush="Green"
+                    CornerRadius="3"
+                    Margin="0,5,0,5"
+                    Height="20"
+                    Background="{StaticResource BgBrush}">
+                <Border.ToolTip>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Начало: " />
+                            <TextBlock Text="{Binding Path=StartTime, ConverterCulture=ru-RU, StringFormat={}{0:dd.MM.yyyy HH:mm}}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Конец:  " />
+                            <TextBlock Text="{Binding Path=EndTime, ConverterCulture=ru-RU, StringFormat={}{0:dd.MM.yyyy HH:mm}}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Длительность: " />
+                            <TextBlock Text="{Binding Path=Duration}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border.ToolTip>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <!--<TextBlock Text="{Binding Path=Salary}" />-->
+                    <TextBlock Text="{Binding Path=Data, ConverterCulture=ru-RU}" />
+                    <TextBlock Text=" руб."/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+        
+        <DataTemplate x:Key="TimeLineSheduleChangeBlock" 
+                      DataType="{x:Type tt:TempDataType}" >
+            <Border BorderThickness="1"
+                    BorderBrush="Green"
+                    CornerRadius="3"
+                    Margin="0,5,0,5"
+                    Height="20"
+                    Background="{StaticResource BgBrush}">
+                <Border.ToolTip>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Начало: " />
+                            <TextBlock Text="{Binding Path=StartTime, ConverterCulture=ru-RU, StringFormat={}{0:dd.MM.yyyy HH:mm}}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Конец:  " />
+                            <TextBlock Text="{Binding Path=EndTime, ConverterCulture=ru-RU, StringFormat={}{0:dd.MM.yyyy HH:mm}}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Длительность: " />
+                            <TextBlock Text="{Binding Path=Duration}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border.ToolTip>
+                <TextBlock Text="{Binding Path=Data.Name}" HorizontalAlignment="Center" />
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TimeLineResultBlock" 
+                      DataType="{x:Type tt:TempDataType}">
+            <Border BorderThickness="1"
+                    BorderBrush="Green"
+                    CornerRadius="3"
+                    Margin="0,5,0,5"
+                    Height="20"
+                    Background="Yellow">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Path=StartTime, StringFormat=HH}" />
+                    <TextBlock Text="-" />
+                    <TextBlock Text="{Binding Path=EndTime, StringFormat=HH}" />
+                </StackPanel>
+                <Border.ToolTip>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Начало: " />
+                            <TextBlock Text="{Binding Path=StartTime, ConverterCulture=ru-RU, StringFormat={}{0:dd.MM.yyyy HH:mm}}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Конец:  " />
+                            <TextBlock Text="{Binding Path=EndTime, ConverterCulture=ru-RU, StringFormat={}{0:dd.MM.yyyy HH:mm}}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Длительность: " />
+                            <TextBlock Text="{Binding Path=Duration}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Начислено: " />
+                            <TextBlock Text="{Binding Path=Payment}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border.ToolTip>
+            </Border>
+        </DataTemplate>
+
+    </Window.Resources>
+    
+    <StackPanel Orientation="Vertical" VerticalAlignment="Top" Margin="5">
+        <TextBlock Text="Клик левой кнопкой мыши: между периодами - добавление, на периоде - удаление/редактирование." />
+        <TextBlock Text="Зажатие правой кнопкой мыши на периоде: перемещение периода или изменение его границ." />
+        <StackPanel Orientation="Horizontal">
+
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Временные ряды:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,5,0,0" Height="25" />
+                <TreeView x:Name="TreeView1" 
+                            TreeViewItem.Expanded="TreeViewItem_Expanded" 
+                            TreeViewItem.Collapsed="TreeViewItem_Collapsed"
+                            Width="320">
+                    <TreeViewItem Header="Общие исходные данные" 
+                                    IsExpanded="True"
+                                    Tag="{Binding ElementName=TimeLineAllMonth1}">
+                        <TreeViewItem Header="Праздничные дни" 
+                                        Tag="{Binding ElementName=TimeLineHolyday}"/>
+                        <TreeViewItem Header="Графики работы" 
+                                        IsExpanded="True"
+                                        Tag="{Binding ElementName=TimeLineAllMonth2}">
+                            <TreeViewItem Header="{Binding ElementName=TimeLineShedule_8, Path=Items.Name}" Tag="{Binding ElementName=TimeLineShedule_8}"/>
+                            <TreeViewItem Header="{Binding ElementName=TimeLineShedule_12_1, Path=Items.Name}" Tag="{Binding ElementName=TimeLineShedule_12_1}"/>
+                            <TreeViewItem Header="{Binding ElementName=TimeLineShedule_12_2, Path=Items.Name}" Tag="{Binding ElementName=TimeLineShedule_12_2}"/>
+                            <TreeViewItem Header="{Binding ElementName=TimeLineShedule_12_3, Path=Items.Name}" Tag="{Binding ElementName=TimeLineShedule_12_3}"/>
+                            <TreeViewItem Header="{Binding ElementName=TimeLineShedule_12_4, Path=Items.Name}" Tag="{Binding ElementName=TimeLineShedule_12_4}"/>
+                        </TreeViewItem>
+                    </TreeViewItem>
+                    <TreeViewItem Header="Индивидуально"
+                                    IsExpanded="True"
+                                    Tag="{Binding ElementName=TimeLineAllMonth3}">
+                        <TreeViewItem Header="Изменения оклада *" Tag="{Binding ElementName=TimeLineSalaries}"/>
+                        <TreeViewItem Header="Графики работы *" Tag="{Binding ElementName=TimeLineShedules}"/>
+                        <TreeViewItem Header="Фактическое время *" Tag="{Binding ElementName=TimeLineWorkPeriods}"/>
+                    </TreeViewItem>
+                    <TreeViewItem IsExpanded="True"
+                                    Tag="{Binding ElementName=TimeLineAllMonth4}">
+                        <TreeViewItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Результаты: " />
+                                <TextBlock Text="{Binding Path=AllPayment, ConverterCulture=ru-RU, Source={StaticResource PaymentCalculator}}" />
+                            </StackPanel>
+                        </TreeViewItem.Header>
+
+                        <TreeViewItem Tag="{Binding ElementName=TimeLineNormalPeriods}">
+                            <TreeViewItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Нормальное время: " />
+                                    <TextBlock Text="{Binding Path=NormalPayment, ConverterCulture=ru-RU, Source={StaticResource PaymentCalculator}}" />
+                                </StackPanel>
+                            </TreeViewItem.Header>
+                        </TreeViewItem>
+                                
+                        <TreeViewItem Tag="{Binding ElementName=TimeLineNightPeriods}">
+                            <TreeViewItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Ночное время: " />
+                                    <TextBlock Text="{Binding Path=NightPayment, ConverterCulture=ru-RU, Source={StaticResource PaymentCalculator}}" />
+                                </StackPanel>
+                            </TreeViewItem.Header>
+                        </TreeViewItem>
+
+                        <TreeViewItem Tag="{Binding ElementName=TimeLineOvertimePeriods}">
+                            <TreeViewItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Сверхурочное время: " />
+                                    <TextBlock Text="{Binding Path=OvertimePayment, ConverterCulture=ru-RU, Source={StaticResource PaymentCalculator}}" />
+                                </StackPanel>
+                            </TreeViewItem.Header>
+                        </TreeViewItem>
+
+                        <TreeViewItem Tag="{Binding ElementName=TimeLineFreedaysPeriods}">
+                            <TreeViewItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Выходные/праздники: " />
+                                    <TextBlock Text="{Binding Path=FreedaysPayment, ConverterCulture=ru-RU, Source={StaticResource PaymentCalculator}}" />
+                                </StackPanel>
+                            </TreeViewItem.Header>
+                        </TreeViewItem>
+                    </TreeViewItem>
+                </TreeView>
+            </StackPanel>
+                    
+            <ListBox x:Name="TimeLines" Width="864" >
+                <tt:TimeLineControl x:Name="TimeLineHeader1"
+                                    Background="AntiqueWhite"
+                                    ViewLevel="Days"
+                                    Items="{Binding Path=AllDays, Source={StaticResource PaymentCalculator}}" 
+                                    ReadOnly="{Binding Path=AllDays.ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource TimeLineHeaderBlock}" />
+                <tt:TimeLineControl x:Name="TimeLineAllMonth1"
+                                    Background="AntiqueWhite"
+                                    ViewLevel="Days"
+                                    Items="{Binding Path=MonthLimits, Source={StaticResource PaymentCalculator}}"
+                                    ReadOnly="{Binding Path=MonthLimits.ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource TimeLineAllMonthBlock}" />
+                <tt:TimeLineControl x:Name="TimeLineHolyday"
+                                    Background="Azure"
+                                    ViewLevel="Days" 
+                                    Items="{Binding Path=Holydays, Source={StaticResource PaymentCalculator}}"
+                                    ReadOnly="{Binding Path=Holydays.ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource HolydayBlock}" />
+                <tt:TimeLineControl x:Name="TimeLineAllMonth2"
+                                    Background="AntiqueWhite"
+                                    ViewLevel="Days"
+                                    Items="{Binding Path=MonthLimits, Source={StaticResource PaymentCalculator}}"
+                                    ReadOnly="{Binding Path=MonthLimits.ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource TimeLineAllMonthBlock}" />
+                <tt:TimeLineControl x:Name="TimeLineShedule_8"
+                                    Background="Azure"
+                                    ViewLevel="Days"
+                                    Items="{Binding Path=Shedules[0], Source={StaticResource PaymentCalculator}}"
+                                    ReadOnly="{Binding Path=Shedules[0].ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource TimeLineSimpleBlock}"/>
+                <tt:TimeLineControl x:Name="TimeLineShedule_12_1"
+                                    Background="AntiqueWhite"
+                                    ViewLevel="Days"
+                                    Items="{Binding Path=Shedules[1], Source={StaticResource PaymentCalculator}}"
+                                    ReadOnly="{Binding Path=Shedules[1].ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource TimeLineSimpleBlock}"/>
+                <tt:TimeLineControl x:Name="TimeLineShedule_12_2"
+                                    Background="Azure"
+                                    ViewLevel="Days"
+                                    Items="{Binding Path=Shedules[2], Source={StaticResource PaymentCalculator}}"
+                                    ReadOnly="{Binding Path=Shedules[2].ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource TimeLineSimpleBlock}"/>
+                <tt:TimeLineControl x:Name="TimeLineShedule_12_3"
+                                    Background="AntiqueWhite"
+                                    ViewLevel="Days"
+                                    Items="{Binding Path=Shedules[3], Source={StaticResource PaymentCalculator}}"
+                                    ReadOnly="{Binding Path=Shedules[3].ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource TimeLineSimpleBlock}"/>
+                <tt:TimeLineControl x:Name="TimeLineShedule_12_4"
+                                    Background="Azure"
+                                    ViewLevel="Days"
+                                    Items="{Binding Path=Shedules[4], Source={StaticResource PaymentCalculator}}"
+                                    ReadOnly="{Binding Path=Shedules[4].ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource TimeLineSimpleBlock}"/>
+                <tt:TimeLineControl x:Name="TimeLineAllMonth3"
+                                    Background="AntiqueWhite"
+                                    ViewLevel="Days"
+                                    Items="{Binding Path=MonthLimits, Source={StaticResource PaymentCalculator}}"
+                                    ReadOnly="{Binding Path=MonthLimits.ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource TimeLineAllMonthBlock}"/>
+                <tt:TimeLineControl x:Name="TimeLineSalaries"
+                                    Background="Azure"
+                                    ViewLevel="Days"
+                                    Items="{Binding Path=Salaries, Source={StaticResource PaymentCalculator}}"
+                                    ReadOnly="{Binding Path=Salaries.ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource TimeLineSalaryBlock}"/>
+                <tt:TimeLineControl x:Name="TimeLineShedules"
+                                    Background="AntiqueWhite"
+                                    ViewLevel="Days"
+                                    Items="{Binding Path=SheduleChanges, Source={StaticResource PaymentCalculator}}"
+                                    ReadOnly="{Binding Path=SheduleChanges.ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource TimeLineSheduleChangeBlock}"/>
+                <tt:TimeLineControl x:Name="TimeLineWorkPeriods"
+                                    Background="Azure"
+                                    ViewLevel="Days"
+                                    Items="{Binding Path=WorkPeriods, Source={StaticResource PaymentCalculator}}"
+                                    ReadOnly="{Binding Path=WorkPeriods.ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource TimeLineSimpleBlock}"/>
+                <tt:TimeLineControl x:Name="TimeLineAllMonth4"
+                                    Background="AntiqueWhite"
+                                    ViewLevel="Days"
+                                    Items="{Binding Path=MonthLimits, Source={StaticResource PaymentCalculator}}"
+                                    ReadOnly="{Binding Path=MonthLimits.ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource TimeLineAllMonthBlock}"/>
+                <tt:TimeLineControl x:Name="TimeLineNormalPeriods"
+                                    Background="Azure"
+                                    ViewLevel="Days"
+                                    Items="{Binding Path=NormalPeriods, Source={StaticResource PaymentCalculator}}"
+                                    ReadOnly="{Binding Path=NormalPeriods.ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource TimeLineResultBlock}"/>
+                <tt:TimeLineControl x:Name="TimeLineNightPeriods"
+                                    Background="AntiqueWhite"
+                                    ViewLevel="Days"
+                                    Items="{Binding Path=NightPeriods, Source={StaticResource PaymentCalculator}}"
+                                    ReadOnly="{Binding Path=NightPeriods.ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource TimeLineResultBlock}"/>
+                <tt:TimeLineControl x:Name="TimeLineOvertimePeriods"
+                                    Background="Azure"
+                                    ViewLevel="Days"
+                                    Items="{Binding Path=OvertimePeriods, Source={StaticResource PaymentCalculator}}"
+                                    ReadOnly="{Binding Path=OvertimePeriods.ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource TimeLineResultBlock}"/>
+                <tt:TimeLineControl x:Name="TimeLineFreedaysPeriods"
+                                    Background="AntiqueWhite"
+                                    ViewLevel="Days"
+                                    Items="{Binding Path=FreedaysPeriods, Source={StaticResource PaymentCalculator}}"
+                                    ReadOnly="{Binding Path=FreedaysPeriods.ReadOnly, Source={StaticResource PaymentCalculator}}"
+                                    ItemTemplate="{StaticResource TimeLineResultBlock}"/>
+            </ListBox>
+                    
+        </StackPanel>
+    </StackPanel>
+    
+</Window>
+

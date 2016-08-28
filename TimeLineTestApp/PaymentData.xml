@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<PaymentData year="2015" month="11">
+
+	<!-- Общие исходные данные -->
+
+	<!-- Праздники 2015 год -->
+	<Holydays begin="2015-01-01" end="2016-01-02">
+		<Holyday begin="2015-01-01" end="2015-01-06" description="Новогодние каникулы" />
+		<Holyday begin="2015-01-07" description="Рождество Христово" />
+		<Holyday begin="2015-01-08" description="Новогодние каникулы" />
+		<Holyday begin="2015-02-23" description="День защитника Отечества" />
+		
+		<Holyday begin="2015-03-09" description="Международный женский день" transferFrom="2015-03-08" />
+		
+		<Holyday begin="2015-05-01" description="Праздник Весны и Труда" />
+		<Holyday begin="2015-05-09" end="2015-05-11" description="День Победы" />
+		<Holyday begin="2015-06-12" description="День России" />
+		<Holyday begin="2015-11-04" description="День народного единства" />
+		<Holyday begin="2015-01-09" description="Новогодние каникулы" transferFrom="2015-01-03" />
+		<Holyday begin="2015-05-04" description="Новогодние каникулы" transferFrom="2015-01-04" />
+	</Holydays>
+
+	<!-- Предпраздничные дни 2015 год -->
+	<PreHolydays>
+		<Date value="2015-04-30" />
+		<Date value="2015-05-08" />
+		<Date value="2015-06-11" />
+		<Date value="2015-11-03" />
+		<Date value="2015-12-31" />
+	</PreHolydays>
+
+	<!-- Далее - индивидуальные исходные данные -->
+	
+	<!-- Изменения окладов -->
+	<Salaries>
+		<Salary end="2015-11-10" value="10000" />
+		<Salary begin="2015-11-10" value="15000" />
+	</Salaries>
+
+	<!-- Изменения графиков работы -->
+	<!--
+			0 - 40-часовая неделя
+			1 - Смена №1
+			2 - Смена №2
+			3 - Смена №3
+			4 - Смена №4
+	-->
+	<Shedules>
+		<Shedule end="2015-11-05" code="1" />
+		<Shedule begin="2015-11-05" end="2015-11-20" code="0" />
+		<Shedule begin="2015-11-20" code="2" />
+	</Shedules>
+	
+	<!-- Фактически отработанное время -->
+	<Work>
+		<Period begin="2015-11-01" beginTime="08:00:00" end="2015-11-01" endTime="18:00:00"/>
+		<Period begin="2015-11-02" beginTime="08:00:00" end="2015-11-02" endTime="18:00:00"/>
+		<Period begin="2015-11-03" beginTime="08:00:00" end="2015-11-03" endTime="18:00:00"/>
+		<Period begin="2015-11-04" beginTime="08:00:00" end="2015-11-04" endTime="18:00:00"/>
+		<!--<Period begin="2015-11-02" beginTime="08:00:00" />-->
+	</Work>
+	
+</PaymentData>
