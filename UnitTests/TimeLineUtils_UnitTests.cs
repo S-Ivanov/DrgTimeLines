@@ -40,17 +40,17 @@ namespace UnitTests
         [TestMethod]
         public void TimeLineUtils_IndexOf_Test()
         {
-            IPeriod[] periods;
+            IEnumerable<IPeriod> periods;
             int index;
 
-            periods = new IPeriod[] { };
+            periods = new List<Period<int>> { };
             index = periods.IndexOf(new DateTime(2015, 11, 03));
             Assert.AreEqual(-1, index);
 
-            periods = new IPeriod[] 
+            periods = new List<Period<int>>
             { 
-                new Period(new DateTime(2015, 11, 02), new DateTime(2015, 11, 04)),
-                new Period(new DateTime(2015, 11, 06), new DateTime(2015, 11, 08)),
+                new Period<int>(new DateTime(2015, 11, 02), new DateTime(2015, 11, 04), 0),
+                new Period<int>(new DateTime(2015, 11, 06), new DateTime(2015, 11, 08), 1),
             };
             index = periods.IndexOf(new DateTime(2015, 11, 01));
             Assert.AreEqual(-1, index);

@@ -10,6 +10,20 @@ namespace ConsoleTests2
     {
         static void Main(string[] args)
         {
+            IEnumerable<IPeriod> tiimeLine = new List<Period>
+            {
+                new Period { Start = DateTime.Today }
+            };
         }
+    }
+
+    interface IPeriod
+    {
+        DateTime Start { get; set; }
+    }
+
+    class Period : IPeriod
+    {
+        public DateTime Start { get; set; }
     }
 }
