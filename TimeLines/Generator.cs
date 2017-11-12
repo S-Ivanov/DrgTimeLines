@@ -97,7 +97,7 @@ namespace TimeLines
 			}
 		}
 
-		#endregion Генерация временных рядов
+        #endregion Генерация временных рядов
 
-	}
+    }
 }
