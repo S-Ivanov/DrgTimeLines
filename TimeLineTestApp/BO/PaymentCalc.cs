@@ -48,8 +48,8 @@ namespace TimeLineTestApp
 			{
 				return new TimeLineTestApp.TimeLine
                 {
-                    new TimeLineTestApp.Period { Start = StartDate, End = StartDate.AddSeconds(1) },
-                    new TimeLineTestApp.Period { Start = EndDate.AddSeconds(-1), End = EndDate },
+                    new TimeLineTestApp.Period { Begin = StartDate, End = StartDate.AddSeconds(1) },
+                    new TimeLineTestApp.Period { Begin = EndDate.AddSeconds(-1), End = EndDate },
                 };
 			}
 		}
@@ -63,7 +63,7 @@ namespace TimeLineTestApp
 			{
 				return new TimeLineTestApp.TimeLine(
 					TimeLines.Generator.Generate(StartDate, StartDate.AddMonths(1), TimeSpan.FromDays(1), TimeSpan.FromDays(1),
-						(start, end) => new CalendarPeriod { Start = start, End = end, Data = start.DayOfWeek == DayOfWeek.Saturday || start.DayOfWeek == DayOfWeek.Sunday }));
+						(start, end) => new CalendarPeriod { Begin = start, End = end, Data = start.DayOfWeek == DayOfWeek.Saturday || start.DayOfWeek == DayOfWeek.Sunday }));
 			}
 		}
 
@@ -127,7 +127,7 @@ namespace TimeLineTestApp
 						paymentData.Shedules,
 						(start, end, x) => new ShedulePeriod
 						{
-							Start = start,
+							Begin = start,
 							End = end,
 							Data = shedules[(x as PaymentDataShedule).code]
 						},
@@ -152,7 +152,7 @@ namespace TimeLineTestApp
 						paymentData.Salaries,
 						(start, end, x) => new SalaryPeriod
 						{
-							Start = start,
+							Begin = start,
 							End = end,
 							Data = (x as PaymentDataSalary).value
 						});
@@ -176,7 +176,7 @@ namespace TimeLineTestApp
 						paymentData.Work,
 						(start, end, x) => new Period
 						{
-							Start = start,
+							Begin = start,
 							End = end
 						});
 					workPeriods.CollectionChanged += workPeriods_CollectionChanged;
@@ -401,7 +401,7 @@ namespace TimeLineTestApp
                     new IEnumerable<IPeriod>[] { Salaries, SheduleChanges, periods },
                     (start, end, pp) => new PaymentInfoPeriod
                     {
-                        Start = start,
+                        Begin = start,
                         End = end,
                         Data = new PaymentInfo 
                         { 
@@ -522,7 +522,7 @@ namespace TimeLineTestApp
 				orderby holyday.begin
 				select new HolydayPeriod
 				{
-					Start = holyday.begin,
+					Begin = holyday.begin,
 					End = holyday.endSpecified ? holyday.end.AddDays(1) : holyday.begin.AddDays(1),
 					TransferFrom = holyday.transferFromSpecified ? holyday.transferFrom : (DateTime?)null,
 					Description = holyday.description
@@ -530,7 +530,7 @@ namespace TimeLineTestApp
 
 			if (TimeLineUtils.Check(xx))
 			{
-				return new TimeLineTestApp.TimeLine(xx.Where(x => x.Start.Year == paymentData.Year && x.Start.Month == paymentData.Month));
+				return new TimeLineTestApp.TimeLine(xx.Where(x => x.Begin.Year == paymentData.Year && x.Begin.Month == paymentData.Month));
 			}
 			else
 				throw new ArgumentException("Holydays");
@@ -592,14 +592,14 @@ namespace TimeLineTestApp
 							{
 								TimeSpan delta = TimeSpan.FromHours(8) + TimeSpan.FromHours(12 * (dayNo - 1));
 								dayNo = dayNo < 4 ? dayNo + 1 : 1;
-								return delta.TotalDays >= 1 ? null : new Period { Start = start + delta, End = end + delta };
+								return delta.TotalDays >= 1 ? null : new Period { Begin = start + delta, End = end + delta };
 							}),
 						new Period[]
 						{
-							new Period { Start = StartDate, End = EndDate }
+							new Period { Begin = StartDate, End = EndDate }
 						}
 					},
-					(start, end) => new Period[] { new Period { Start = start, End = end } }));
+					(start, end) => new Period[] { new Period { Begin = start, End = end } }));
 		}
 
 		private Shedule LoadShedule_8()
@@ -608,7 +608,7 @@ namespace TimeLineTestApp
 				GetShedule_8(
 					StartDate, 
 					EndDate,
-					(Holydays as IEnumerable<IPeriod>).Select(d => d.Start.Date), 
+					(Holydays as IEnumerable<IPeriod>).Select(d => d.Begin.Date), 
 					paymentData.PreHolydays.Select(d => d.value)));
 		}
 
@@ -622,11 +622,11 @@ namespace TimeLineTestApp
 				(start, end) =>
 				{
 					if (preHolydays.Contains(start.Date))
-						return new Period { Start = start, End = end.AddHours(-1) };
+						return new Period { Begin = start, End = end.AddHours(-1) };
 					else if (start.DayOfWeek == DayOfWeek.Saturday || start.DayOfWeek == DayOfWeek.Sunday || holydays.Contains(start.Date))
 						return null;
 					else
-						return new Period { Start = start, End = end };
+						return new Period { Begin = start, End = end };
 				});
 		}
 

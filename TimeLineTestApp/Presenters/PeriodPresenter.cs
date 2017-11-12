@@ -75,7 +75,7 @@ namespace TimeLineTestApp
 				}
 				else
 				{
-					endLimit = (periods[nextPeriodIndex] as IPeriod).Start;
+					endLimit = (periods[nextPeriodIndex] as IPeriod).Begin;
 					if (nextPeriodIndex > 0)
 						startLimit = (periods[nextPeriodIndex - 1] as IPeriod).End;
 				}
@@ -90,9 +90,9 @@ namespace TimeLineTestApp
 				if (periodIndex > 0)
 					startLimit = (periods[periodIndex - 1] as IPeriod).End;
 				if (periodIndex < periods.Count - 1)
-					endLimit = (periods[periodIndex + 1] as IPeriod).Start;
+					endLimit = (periods[periodIndex + 1] as IPeriod).Begin;
 
-				periodModel.SetPeriodProperties(period.Start, startLimit, period.End, endLimit, minDuration);
+				periodModel.SetPeriodProperties(period.Begin, startLimit, period.End, endLimit, minDuration);
 			}
 
 			SetModelProperties(period);
@@ -132,7 +132,7 @@ namespace TimeLineTestApp
 			else
 			{
 				// конечное действие - изменение периода
-				period.Start = periodModel.Start;
+				period.Begin = periodModel.Start;
 				period.End = periodModel.End;
 				SetPeriodProperties(period);
 			}
@@ -144,7 +144,7 @@ namespace TimeLineTestApp
 
 		protected virtual Period CreatePeriod()
 		{
-			return new Period { Start = periodModel.Start, End = periodModel.End };
+			return new Period { Begin = periodModel.Start, End = periodModel.End };
 		}
 
 		/// <summary>

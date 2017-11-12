@@ -40,7 +40,7 @@ namespace TimeLineTestApp
 
 		protected override Period CreatePeriod()
 		{
-			return new ShedulePeriod { Start = periodModel.Start, End = periodModel.End, Data = (periodModel as IShedulePeriodModel).Shedule };
+			return new ShedulePeriod { Begin = periodModel.Start, End = periodModel.End, Data = (periodModel as IShedulePeriodModel).Shedule };
 		}
 
 	}

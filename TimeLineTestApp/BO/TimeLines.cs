@@ -25,7 +25,7 @@ namespace TimeLineTestApp
 
 			this.timeLineItemCreate = 
                 timeLineItemCreate ??
-                (p => new TimeLineTestApp.Period { Start = p.Start, End = p.End });
+                (p => new TimeLineTestApp.Period { Begin = p.Begin, End = p.End });
 
 			CopyFrom(periods);
 			ReadOnly = readOnly;

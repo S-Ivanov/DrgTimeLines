@@ -46,7 +46,7 @@ namespace TimeLineTestApp
 
 		protected override Period CreatePeriod()
 		{
-			return new SalaryPeriod { Start = periodModel.Start, End = periodModel.End, Data = (periodModel as ISalaryPeriodModel).Salary };
+			return new SalaryPeriod { Begin = periodModel.Start, End = periodModel.End, Data = (periodModel as ISalaryPeriodModel).Salary };
 		}
 
 	}

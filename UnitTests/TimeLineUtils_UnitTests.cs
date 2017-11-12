@@ -9,33 +9,45 @@ namespace UnitTests
 	[TestClass]
 	public class TimeLineUtils_UnitTests
 	{
-		//[TestMethod]
-		//public void TimeLineUtils_Compare_Test()
-		//{
-		//	IPeriod[] first =
-		//		new IPeriod[]
-		//		{
-		//			new Period(new DateTime(2015, 10, 09), new DateTime(2015, 10, 10)), 
-		//			new Period(new DateTime(2015, 10, 11), new DateTime(2015, 10, 12)), 
-		//			//new Period(new DateTime(2015, 10, 13), new DateTime(2016, 10, 14)), 
-		//			new Period(new DateTime(2015, 10, 15), new DateTime(2015, 10, 16)),
- 
-		//			new Period(new DateTime(2015, 10, 15), new DateTime(2015, 10, 16)), 
-		//			new Period(new DateTime(2015, 10, 15), new DateTime(2015, 10, 16)), 
-		//		};
+        //[TestMethod]
+        //public void TimeLineUtils_Compare_Test()
+        //{
+        //	IPeriod[] first =
+        //		new IPeriod[]
+        //		{
+        //			new Period(new DateTime(2015, 10, 09), new DateTime(2015, 10, 10)), 
+        //			new Period(new DateTime(2015, 10, 11), new DateTime(2015, 10, 12)), 
+        //			//new Period(new DateTime(2015, 10, 13), new DateTime(2016, 10, 14)), 
+        //			new Period(new DateTime(2015, 10, 15), new DateTime(2015, 10, 16)),
 
-		//	IPeriod[] second =
-		//		new IPeriod[]
-		//		{
-		//			new Period(new DateTime(2015, 10, 09), new DateTime(2015, 10, 10)), 
-		//			new Period(new DateTime(2015, 10, 11), new DateTime(2015, 10, 12)), 
-		//			new Period(new DateTime(2015, 10, 13), new DateTime(2015, 10, 14)), 
-		//		};
+        //			new Period(new DateTime(2015, 10, 15), new DateTime(2015, 10, 16)), 
+        //			new Period(new DateTime(2015, 10, 15), new DateTime(2015, 10, 16)), 
+        //		};
 
-		//	var result = TimeLineUtils.Compare(first, second);
+        //	IPeriod[] second =
+        //		new IPeriod[]
+        //		{
+        //			new Period(new DateTime(2015, 10, 09), new DateTime(2015, 10, 10)), 
+        //			new Period(new DateTime(2015, 10, 11), new DateTime(2015, 10, 12)), 
+        //			new Period(new DateTime(2015, 10, 13), new DateTime(2015, 10, 14)), 
+        //		};
 
-		//	Assert.AreNotEqual(0, result.Length);
-		//}
+        //	var result = TimeLineUtils.Compare(first, second);
+
+        //	Assert.AreNotEqual(0, result.Length);
+        //}
+
+        [TestMethod]
+        public void TimeLineUtils_Check_Test()
+        {
+            List<Period> periods = new List<Period>
+            {
+                new Period(new DateTime(2015, 11, 02), new DateTime(2015, 11, 04)),
+                new Period(new DateTime(2015, 11, 05), new DateTime(2015, 11, 05)),
+                new Period(new DateTime(2015, 11, 07), new DateTime(2015, 11, 08)),
+            };
+            Assert.IsTrue(periods.Check());
+        }
 
         [TestMethod]
         public void TimeLineUtils_IndexOf_Test()
@@ -50,18 +62,21 @@ namespace UnitTests
             periods = new List<Period<int>>
             { 
                 new Period<int>(new DateTime(2015, 11, 02), new DateTime(2015, 11, 04), 0),
-                new Period<int>(new DateTime(2015, 11, 06), new DateTime(2015, 11, 08), 1),
+                new Period<int>(new DateTime(2015, 11, 05), new DateTime(2015, 11, 05), 1),
+                new Period<int>(new DateTime(2015, 11, 07), new DateTime(2015, 11, 08), 2),
             };
             index = periods.IndexOf(new DateTime(2015, 11, 01));
             Assert.AreEqual(-1, index);
             index = periods.IndexOf(new DateTime(2015, 11, 03));
             Assert.AreEqual(0, index);
             index = periods.IndexOf(new DateTime(2015, 11, 05));
-            Assert.AreEqual(-2, index);
-            index = periods.IndexOf(new DateTime(2015, 11, 07));
             Assert.AreEqual(1, index);
-            index = periods.IndexOf(new DateTime(2015, 11, 09));
+            index = periods.IndexOf(new DateTime(2015, 11, 06));
             Assert.AreEqual(-3, index);
+            index = periods.IndexOf(new DateTime(2015, 11, 07));
+            Assert.AreEqual(2, index);
+            index = periods.IndexOf(new DateTime(2015, 11, 09));
+            Assert.AreEqual(-4, index);
         }
 
         [TestMethod]
@@ -127,6 +142,7 @@ namespace UnitTests
 		[TestMethod]
         public void TimeLineUtils_Subtract_Test()
         {
+            // TODO: проверить с событием
             List<IPeriod> t1 = new List<IPeriod>
 			{
 				//new Period(new DateTime(2015, 12, 1), new DateTime(2015, 12, 3)), 
@@ -152,7 +168,8 @@ namespace UnitTests
         [TestMethod]
 		public void TimeLineUtils_Join_Test()
 		{
-			List<IPeriod> timeLine1;
+            // TODO: проверить с событием
+            List<IPeriod> timeLine1;
 			List<IPeriod> timeLine2;
 			List<IPeriod> actual;
 			List<IPeriod> expected;
@@ -183,7 +200,8 @@ namespace UnitTests
 		[TestMethod]
 		public void TimeLineUtils_Split_Test()
 		{
-			List<IPeriod> timeLine;
+            // TODO: проверить с событием
+            List<IPeriod> timeLine;
 			List<IPeriod> actual;
 			List<IPeriod> expected;
 
@@ -207,7 +225,8 @@ namespace UnitTests
 		[TestMethod]
 		public void TimeLineUtils_Merge_Test()
 		{
-			List<IPeriod> timeLine;
+            // TODO: проверить с событием
+            List<IPeriod> timeLine;
 			List<IPeriod> actual;
 			List<IPeriod> expected;
 
@@ -229,7 +248,8 @@ namespace UnitTests
 		[TestMethod]
 		public void TimeLineUtils_Or_Test()
 		{
-			List<List<IPeriod>> timeLines;
+            // TODO: проверить с событием
+            List<List<IPeriod>> timeLines;
 			List<Period<IPeriod[]>> actual;
 			List<Period<IPeriod[]>> expected;
 
@@ -302,57 +322,60 @@ namespace UnitTests
 		[TestMethod]
 		public void TimeLineUtils_And_Test()
 		{
-			List<List<IPeriod>> timeLines;
-			List<Period<IPeriod[]>> actual;
-			List<Period<IPeriod[]>> expected;
+            List<List<IPeriod>> timeLines;
+            List<Period<IPeriod[]>> actual;
+            List<Period<IPeriod[]>> expected;
 
-			timeLines = new List<List<IPeriod>>
-			{
-				new List<IPeriod>
-				{
-					new Period(new DateTime(2015, 12, 1), new DateTime(2015, 12, 3)), 
-					new Period(new DateTime(2015, 12, 4), new DateTime(2015, 12, 6)), 
+            timeLines = new List<List<IPeriod>>
+            {
+                new List<IPeriod>
+                {
+                    new Period(new DateTime(2015, 12, 1), new DateTime(2015, 12, 3)),
+                    new Period(new DateTime(2015, 12, 4), new DateTime(2015, 12, 4)),
+                    new Period(new DateTime(2015, 12, 5), new DateTime(2015, 12, 6)),
 
-				},
-				new List<IPeriod>
-				{
-					new Period(new DateTime(2015, 12, 2), new DateTime(2015, 12, 5)), 
-				},
-			};
-			expected = new List<Period<IPeriod[]>>
-			{
-				new Period<IPeriod[]>(new DateTime(2015, 12, 2), new DateTime(2015, 12, 3), null),
-				new Period<IPeriod[]>(new DateTime(2015, 12, 4), new DateTime(2015, 12, 5), null),
-			};
-			actual = TimeLineUtils.And(timeLines).ToList();
-			// проверка периодов результата
-			CollectionAssert.AreEqual(expected, actual, new PeriodComparer());
+                },
+                new List<IPeriod>
+                {
+                    new Period(new DateTime(2015, 12, 2), new DateTime(2015, 12, 6)),
+                },
+            };
+            expected = new List<Period<IPeriod[]>>
+            {
+                new Period<IPeriod[]>(new DateTime(2015, 12, 2), new DateTime(2015, 12, 3), null),
+                new Period<IPeriod[]>(new DateTime(2015, 12, 4), new DateTime(2015, 12, 4), null),
+                new Period<IPeriod[]>(new DateTime(2015, 12, 5), new DateTime(2015, 12, 6), null),
+            };
+            actual = TimeLineUtils.And(timeLines).ToList();
+            // проверка периодов результата
+            CollectionAssert.AreEqual(expected, actual, new PeriodComparer());
 
-			timeLines = new List<List<IPeriod>>
-			{
-				new List<IPeriod>
-				{
-					new Period(new DateTime(2015, 12, 1), new DateTime(2015, 12, 2)), 
-					new Period(new DateTime(2015, 12, 4), new DateTime(2015, 12, 6)), 
+            timeLines = new List<List<IPeriod>>
+            {
+                new List<IPeriod>
+                {
+                    new Period(new DateTime(2015, 12, 1), new DateTime(2015, 12, 2)),
+                    new Period(new DateTime(2015, 12, 4), new DateTime(2015, 12, 6)),
 
-				},
-				new List<IPeriod>
-				{
-					new Period(new DateTime(2015, 12, 3), new DateTime(2015, 12, 5)), 
-				},
-			};
-			expected = new List<Period<IPeriod[]>>
-			{
-				new Period<IPeriod[]>(new DateTime(2015, 12, 4), new DateTime(2015, 12, 5), null),
-			};
-			actual = TimeLineUtils.And(timeLines).ToList();
-			// проверка периодов результата
-			CollectionAssert.AreEqual(expected, actual, new PeriodComparer());
-		}
+                },
+                new List<IPeriod>
+                {
+                    new Period(new DateTime(2015, 12, 3), new DateTime(2015, 12, 5)),
+                },
+            };
+            expected = new List<Period<IPeriod[]>>
+            {
+                new Period<IPeriod[]>(new DateTime(2015, 12, 4), new DateTime(2015, 12, 5), null),
+            };
+            actual = TimeLineUtils.And(timeLines).ToList();
+            // проверка периодов результата
+            CollectionAssert.AreEqual(expected, actual, new PeriodComparer());
+        }
 
-		[TestMethod]
+        [TestMethod]
 		public void TimeLineUtils_Not_Test()
 		{
+            // TODO: проверить с событием
 			List<IPeriod> timeLine;
 			List<IPeriod> actual;
 			List<Period> expected;
@@ -446,7 +469,7 @@ namespace UnitTests
 					month11,
 					TimeLines.Generator.Generate(new DateTime(2015, 10, 31, 20, 0, 0), monthFinish, TimeSpan.FromHours(12), TimeSpan.FromHours(36))
 				}
-			).Sum(period => (period.End - period.Start).TotalHours);
+			).Sum(period => (period.End - period.Begin).TotalHours);
 			Assert.AreEqual(240, duration);
 
 			// 2-я смена – с 8:00 01.11.2015  
@@ -455,7 +478,7 @@ namespace UnitTests
 					month11,
 					TimeLines.Generator.Generate(new DateTime(2015, 11, 01, 08, 0, 0), monthFinish, TimeSpan.FromHours(12), TimeSpan.FromHours(36))
 				}
-			).Sum(period => (period.End - period.Start).TotalHours);
+			).Sum(period => (period.End - period.Begin).TotalHours);
 			Assert.AreEqual(240, duration);
 
 			// 3-я смена – с 20:00 01.11.2015 
@@ -464,14 +487,15 @@ namespace UnitTests
 					month11,
 					TimeLines.Generator.Generate(new DateTime(2015, 11, 01, 20, 0, 0), monthFinish, TimeSpan.FromHours(12), TimeSpan.FromHours(36))
 				}
-			).Sum(period => (period.End - period.Start).TotalHours);
+			).Sum(period => (period.End - period.Begin).TotalHours);
 			Assert.AreEqual(240, duration);
 		}
 
 		[TestMethod]
 		public void TimeLineUtils_Transform_Test()
 		{
-			List<IPeriod> actual;
+            // TODO: проверить с событием
+            List<IPeriod> actual;
 			List<Period> expected;
 			DateTime lastStart = DateTime.MaxValue;
 
@@ -502,11 +526,11 @@ namespace UnitTests
 			.Transform(
 				period => 
 					{
-						if (period.Start.Date == lastStart)
+						if (period.Begin.Date == lastStart)
 							return null;
 						else
 						{
-							lastStart = period.Start.Date;
+							lastStart = period.Begin.Date;
 							return new IPeriod[] { new Period(lastStart, TimeSpan.FromDays(1)) };
 						}
 					}

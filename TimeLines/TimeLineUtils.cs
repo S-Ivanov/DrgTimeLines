@@ -31,7 +31,7 @@ namespace TimeLines
             return timeLine.Select(
                 period =>
                 {
-                    object[] args = new object[] { period.Start, period.End, data };
+                    object[] args = new object[] { period.Begin, period.End, data };
                     return Activator.CreateInstance(periodType, args) as IPeriod;
                 }
             );
@@ -69,7 +69,7 @@ namespace TimeLines
             int index = 0;
             foreach (var period in timeLine)
             {
-                if (dt < period.Start)
+                if (dt < period.Begin)
                     return ~index;
                 else if (period.Contains(dt, true, false))
                     return index;
@@ -90,7 +90,7 @@ namespace TimeLines
 			var timeLine =
 				from p in periods
 				where p != null
-				orderby p.Start
+				orderby p.Begin
 				select p;
 
             if (!checkTimeLine || Check(timeLine))
@@ -195,30 +195,30 @@ namespace TimeLines
 
 		static IEnumerable<IPeriod> MergeInternal(IEnumerable<IPeriod> timeLine, Func<IPeriod, IPeriod, bool> equalsDataFunc, Func<IPeriod, DateTime, DateTime, IPeriod> copyPeriodFunc)
 		{
-			DateTime newPeriodStart = DateTime.MinValue;
+			DateTime newPeriodBegin = DateTime.MinValue;
 			IPeriod previousPeriod = null;
 			foreach (var period in timeLine)
 			{
 				if (previousPeriod == null)
 				{
 					previousPeriod = period;
-					newPeriodStart = period.Start;
+					newPeriodBegin = period.Begin;
 				}
 				else
 				{
-					if (period.Start == previousPeriod.End && equalsDataFunc(previousPeriod, period))
+					if (period.Begin == previousPeriod.End && equalsDataFunc(previousPeriod, period))
 						previousPeriod = period;
 					else
 					{
-						yield return copyPeriodFunc(previousPeriod, newPeriodStart, previousPeriod.End);
-						newPeriodStart = period.Start;
+						yield return copyPeriodFunc(previousPeriod, newPeriodBegin, previousPeriod.End);
+						newPeriodBegin = period.Begin;
 						previousPeriod = period;
 					}
 				}
 			}
 
 			if (previousPeriod != null)
-				yield return copyPeriodFunc(previousPeriod, newPeriodStart, previousPeriod.End);
+				yield return copyPeriodFunc(previousPeriod, newPeriodBegin, previousPeriod.End);
 		}
 
 		/// <summary>
@@ -239,7 +239,7 @@ namespace TimeLines
 			if (duration <= TimeSpan.Zero)
 				throw new ArgumentOutOfRangeException("duration");
 			if (copyPeriodFunc == null)
-				copyPeriodFunc = (p, start, end, aboveDuration) => p.CreateAnalogue(start, end);
+				copyPeriodFunc = (p, begin, end, aboveDuration) => p.CreateAnalogue(begin, end);
 
 			return SplitInternal(timeLine, duration, copyPeriodFunc);
 		}
@@ -250,14 +250,14 @@ namespace TimeLines
 			bool aboveDurationCurrent = false;
 			foreach (var period in timeLine)
 			{
-				realDuration += period.End - period.Start;
+				realDuration += period.End - period.Begin;
 				if (aboveDurationCurrent || realDuration <= duration)
-					yield return copyPeriodFunc(period, period.Start, period.End, aboveDurationCurrent);
+					yield return copyPeriodFunc(period, period.Begin, period.End, aboveDurationCurrent);
 				else
 				{
 					TimeSpan periodDuration = realDuration - duration;
-					yield return copyPeriodFunc(period, period.Start, period.Start + periodDuration, false);
-					yield return copyPeriodFunc(period, period.Start + periodDuration, period.End, true);
+					yield return copyPeriodFunc(period, period.Begin, period.Begin + periodDuration, false);
+					yield return copyPeriodFunc(period, period.Begin + periodDuration, period.End, true);
 					aboveDurationCurrent = true;
 				}
 			}
@@ -276,7 +276,7 @@ namespace TimeLines
 			DateTime? prevEnd = null;
 			foreach (var period in timeLine)
 			{
-                if (period == null || !period.Check() || (prevEnd != null && period.Start < prevEnd.Value))
+                if (period == null || !period.Check() || (prevEnd != null && period.Begin < prevEnd.Value))
 					return false;
 					
 				prevEnd = period.End;
@@ -347,7 +347,7 @@ namespace TimeLines
 				return null;
 			else
 			{
-				result = result.OrderBy(period => period.Start);
+				result = result.OrderBy(period => period.Begin);
 				if (Check(result))
 					return result;
 				else
@@ -370,22 +370,22 @@ namespace TimeLines
 				throw new ArgumentException("checkTimeLine");
 
 			if (periodCreateFunc == null)
-				periodCreateFunc = (periodStart, periodEnd) => new Period(periodStart, periodEnd);
+				periodCreateFunc = (periodBegin, periodEnd) => new Period(periodBegin, periodEnd);
 
 			return NotInternal(timeLine, periodCreateFunc, checkTimeLine, DateTime.MinValue, DateTime.MaxValue);
 		}
 
-		static IEnumerable<IPeriod> NotInternal(IEnumerable<IPeriod> timeLine, Func<DateTime, DateTime, IPeriod> periodCreateFunc, bool checkTimeLine, DateTime start, DateTime end)
+		static IEnumerable<IPeriod> NotInternal(IEnumerable<IPeriod> timeLine, Func<DateTime, DateTime, IPeriod> periodCreateFunc, bool checkTimeLine, DateTime begin, DateTime end)
 		{
 			foreach (var period in timeLine)
 			{
-				end = period.Start;
-				if (start < end)
-					yield return periodCreateFunc(start, end);
-				start = period.End;
+				end = period.Begin;
+				if (begin < end)
+					yield return periodCreateFunc(begin, end);
+				begin = period.End;
 			}
-			if (start < DateTime.MaxValue)
-				yield return periodCreateFunc(start, DateTime.MaxValue);
+			if (begin < DateTime.MaxValue)
+				yield return periodCreateFunc(begin, DateTime.MaxValue);
 		}
 
         /// <summary>
@@ -406,7 +406,7 @@ namespace TimeLines
 		/// <returns></returns>
 		public static IEnumerable<Period<IPeriod[]>> Or(IEnumerable<IEnumerable<IPeriod>> timeLines, bool checkTimeLine = false)
 		{
-			return Or(timeLines, (start, end, periodData) => new IPeriod[] { new Period<IPeriod[]>(start, end, periodData) }, checkTimeLine).Cast<Period<IPeriod[]>>();
+			return Or(timeLines, (begin, end, periodData) => new IPeriod[] { new Period<IPeriod[]>(begin, end, periodData) }, checkTimeLine).Cast<Period<IPeriod[]>>();
 		} 
 
 		/// <summary>
@@ -421,7 +421,7 @@ namespace TimeLines
 			if (periodsCreateFunc == null)
 				throw new ArgumentNullException("periodCreateFunc");
 
-			return Or(timeLines, null, (start, end, periodData) => periodsCreateFunc(start, end), checkTimeLine);
+			return Or(timeLines, null, (begin, end, periodData) => periodsCreateFunc(begin, end), checkTimeLine);
 		}
 
 		/// <summary>
@@ -438,8 +438,8 @@ namespace TimeLines
 
 			return Or(
 				timeLines,
-				(start, end, buffer, target) => CopyBufferPeriods(start, end, buffer, target),
-				(start, end, periods) => new IPeriod[] { periodCreateFunc(start, end, periods) },
+				(begin, end, buffer, target) => CopyBufferPeriods(begin, end, buffer, target),
+				(begin, end, periods) => new IPeriod[] { periodCreateFunc(begin, end, periods) },
 				checkTimeLine
 			);
 		}
@@ -458,7 +458,7 @@ namespace TimeLines
 
 			return Or(
 				timeLines,
-				(start, end, buffer, target) => CopyBufferPeriods(start, end, buffer, target),
+				(begin, end, buffer, target) => CopyBufferPeriods(begin, end, buffer, target),
 				periodsCreateFunc,
 				checkTimeLine
 			);
@@ -481,7 +481,7 @@ namespace TimeLines
 			return Combine(
 				timeLines, 
 				periodsCreateFunc, 
-				(start, end, buffer) => buffer.Any(period => period != null && period.Intersected(start, end)), 
+				(begin, end, buffer) => buffer.Any(period => period != null && period.Intersected(begin, end)), 
 				copyPeriodsAction,
 				checkTimeLine);
 		}
@@ -504,22 +504,29 @@ namespace TimeLines
 		/// <returns></returns>
 		public static IEnumerable<Period<IPeriod[]>> And(IEnumerable<IEnumerable<IPeriod>> timeLines, bool checkTimeLine = false)
 		{
-			return And(timeLines, (start, end, periodData) => new Period<IPeriod[]>(start, end, periodData), checkTimeLine).Cast<Period<IPeriod[]>>();
-		}
+            Func<DateTime, DateTime, IPeriod[], IPeriod> periodsCreateFunc = (begin, end, periods) =>
+            {
+                var momentoPeriod = periods.FirstOrDefault(p => p.Begin == p.End);
+                if (momentoPeriod != null)
+                    begin = end = momentoPeriod.Begin;
+                return new Period<IPeriod[]>(begin, end, periods);
+            };
+            return And(timeLines, periodsCreateFunc, checkTimeLine).Cast<Period<IPeriod[]>>();
+        }
 
-		/// <summary>
-		/// Логическое умножение временных рядов
-		/// </summary>
-		/// <param name="timeLines">исходные временные ряды</param>
-		/// <param name="periodsCreateFunc">функция генерации периодов</param>
-		/// <param name="checkTimeLine">требуется ли проверка входного временного ряда</param>
-		/// <returns></returns>
-		public static IEnumerable<IPeriod> And(IEnumerable<IEnumerable<IPeriod>> timeLines, Func<DateTime, DateTime, IEnumerable<IPeriod>> periodsCreateFunc, bool checkTimeLine = false)
+        /// <summary>
+        /// Логическое умножение временных рядов
+        /// </summary>
+        /// <param name="timeLines">исходные временные ряды</param>
+        /// <param name="periodsCreateFunc">функция генерации периодов</param>
+        /// <param name="checkTimeLine">требуется ли проверка входного временного ряда</param>
+        /// <returns></returns>
+        public static IEnumerable<IPeriod> And(IEnumerable<IEnumerable<IPeriod>> timeLines, Func<DateTime, DateTime, IEnumerable<IPeriod>> periodsCreateFunc, bool checkTimeLine = false)
 		{
 			if (periodsCreateFunc == null)
 				throw new ArgumentNullException("periodCreateFunc");
 
-			return And(timeLines, null, (start, end, periodData) => periodsCreateFunc(start, end), checkTimeLine);
+			return And(timeLines, null, (begin, end, periodData) => periodsCreateFunc(begin, end), checkTimeLine);
 		}
 
 		/// <summary>
@@ -536,8 +543,8 @@ namespace TimeLines
 
 			return And(
 				timeLines,
-				(start, end, buffer, target) => CopyBufferPeriods(start, end, buffer, target),
-				(start, end, periods) => new IPeriod[] { periodCreateFunc(start, end, periods) },
+				(begin, end, buffer, target) => CopyBufferPeriods(begin, end, buffer, target),
+				(begin, end, periods) => new IPeriod[] { periodCreateFunc(begin, end, periods) },
 				checkTimeLine
 			);
 		}
@@ -545,15 +552,15 @@ namespace TimeLines
 		/// <summary>
 		/// Копирование периодов
 		/// </summary>
-		/// <param name="start"></param>
+		/// <param name="begin"></param>
 		/// <param name="end"></param>
 		/// <param name="source"></param>
 		/// <param name="target"></param>
-		static void CopyBufferPeriods(DateTime start, DateTime end, IPeriod[] source, IPeriod[] target)
+		static void CopyBufferPeriods(DateTime begin, DateTime end, IPeriod[] source, IPeriod[] target)
 		{
 			for (int i = 0; i < source.Length; i++)
 			{
-				if (source[i] != null && source[i].Intersected(start, end))
+				if (source[i] != null && source[i].Intersected(begin, end))
 				{
 					target[i] = source[i];
 				}
@@ -577,7 +584,7 @@ namespace TimeLines
 			return Combine(
 				timeLines, 
 				periodsCreateFunc,
-				(start, end, buffer) => buffer.All(period => period != null && period.Intersected(start, end)), 
+				(begin, end, buffer) => buffer.All(period => period != null && period.Intersected(begin, end)), 
 				copyPeriodsAction,
 				checkTimeLine
 			);
@@ -640,15 +647,15 @@ namespace TimeLines
 
             return Combine(
                     allTimeLines,
-                    periodCreateFunc: (start, end, buffer) =>
+                    periodCreateFunc: (begin, end, buffer) =>
                     {
-                        if (buffer.Skip(1).Any(o => o != null && o.Intersected(start, end)))
+                        if (buffer.Skip(1).Any(o => o != null && o.Intersected(begin, end)))
                             return (IPeriod)null;
                         else
-                            return copyPeriodFunc(buffer[0], start, end);
+                            return copyPeriodFunc(buffer[0], begin, end);
                     },
-                    checkBufferFunc: (start, end, buffer) =>
-                        buffer[0] != null && buffer[0].Intersected(start, end) // && buffer.Skip(1).Any(o => o != null))
+                    checkBufferFunc: (begin, end, buffer) =>
+                        buffer[0] != null && buffer[0].Intersected(begin, end) // && buffer.Skip(1).Any(o => o != null))
                 );
         }
 
@@ -669,11 +676,11 @@ namespace TimeLines
 			bool checkTimeLine = false)
 		{
 			if (periodCreateFunc == null)
-				periodCreateFunc = (start, end, pp) => new Period(start, end);
+				periodCreateFunc = (begin, end, pp) => new Period(begin, end);
 
 			return Combine(
 				timeLines,
-				(start, end, pp) => new IPeriod[] { periodCreateFunc(start, end, pp) },
+				(begin, end, pp) => new IPeriod[] { periodCreateFunc(begin, end, pp) },
 				checkBufferFunc,
 				copyPeriodsAction,
 				checkTimeLine
@@ -708,11 +715,11 @@ namespace TimeLines
 			}
 
 			if (checkBufferFunc == null)
-				checkBufferFunc = (start, end, pp) => true;
+				checkBufferFunc = (begin, end, pp) => true;
 			if (copyPeriodsAction == null)
-				copyPeriodsAction = (start, end, buffer, target) => CopyBufferPeriods(start, end, buffer, target);
+				copyPeriodsAction = (begin, end, buffer, target) => CopyBufferPeriods(begin, end, buffer, target);
 			if (periodsCreateFunc == null)
-				periodsCreateFunc = (start, end, pp) => new IPeriod[] { new Period(start, end) };
+				periodsCreateFunc = (begin, end, pp) => new IPeriod[] { new Period(begin, end) };
 
 			return CombineInternal(timeLines, periodsCreateFunc, checkBufferFunc, copyPeriodsAction);
 		}
@@ -734,12 +741,12 @@ namespace TimeLines
 			}
 
 			// определение самой левой точки = наименьший старт
-			DateTime minStart;
-			if (!PeriodUtils.GetNextPoint(buffer, null, out minStart))
+			DateTime minBegin;
+			if (!PeriodUtils.GetNextPoint(buffer, null, out minBegin))
 				yield break;
 
 			// взять следующую наименьшую точку
-			DateTime prevPoint = minStart;
+			DateTime prevPoint = minBegin;
 			DateTime nextPoint;
 			while (PeriodUtils.GetNextPoint(buffer, prevPoint, out nextPoint))
 			{
@@ -801,13 +808,13 @@ namespace TimeLines
 
 		static IEnumerable<IPeriod> ToDaysInternal(IEnumerable<IPeriod> timeLine, bool checkTimeLine)
         {
-            DateTime periodStartDate = DateTime.MaxValue;
+            DateTime periodBeginDate = DateTime.MaxValue;
             foreach (var period in timeLine)
             {
-                if (periodStartDate == DateTime.MaxValue || periodStartDate <= period.Start.Date)
-                    periodStartDate = period.Start.Date;
-                else if (periodStartDate < period.End)
-                    periodStartDate = periodStartDate.AddDays(1);
+                if (periodBeginDate == DateTime.MaxValue || periodBeginDate <= period.Begin.Date)
+                    periodBeginDate = period.Begin.Date;
+                else if (periodBeginDate < period.End)
+                    periodBeginDate = periodBeginDate.AddDays(1);
                 else //if (periodBeginDate >= period.End)
                     continue;
 
@@ -815,10 +822,10 @@ namespace TimeLines
                 if (period.End > periodEndDate)
                     periodEndDate = periodEndDate.AddDays(1);
 
-                while (periodStartDate < periodEndDate)
+                while (periodBeginDate < periodEndDate)
                 {
-                    yield return new Period(periodStartDate, TimeSpan.FromDays(1));
-                    periodStartDate = periodStartDate.AddDays(1);
+                    yield return new Period(periodBeginDate, TimeSpan.FromDays(1));
+                    periodBeginDate = periodBeginDate.AddDays(1);
                 }
             }
 		}
@@ -842,14 +849,14 @@ namespace TimeLines
 			else
 			{
 				var lastPeriod = timeLine.LastOrDefault();
-				DateTime monthsStart = new DateTime(firstPeriod.Start.Year, firstPeriod.Start.Month, 1);
+				DateTime monthsStart = new DateTime(firstPeriod.Begin.Year, firstPeriod.Begin.Month, 1);
 				var months = Generator.Generate(
 					monthsStart,
-					start => start < lastPeriod.End ? start.AddMonths(1) : (DateTime?)null,
-					start => new Period(start, start.AddMonths(1)));
+                    begin => begin < lastPeriod.End ? begin.AddMonths(1) : (DateTime?)null,
+                    begin => new Period(begin, begin.AddMonths(1)));
 				var xx = Combine(
 					new IEnumerable<IPeriod>[] { months, timeLine },
-					(start, end, pp) => pp[1] == null ? null : new Period(new DateTime(start.Year, start.Month, 1), new DateTime(start.Year, start.Month, 1).AddMonths(1)));
+					(begin, end, pp) => pp[1] == null ? null : new Period(new DateTime(begin.Year, begin.Month, 1), new DateTime(begin.Year, begin.Month, 1).AddMonths(1)));
 				return xx.Distinct(new PeriodComparer());
 			}
 		}

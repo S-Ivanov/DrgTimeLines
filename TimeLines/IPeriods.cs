@@ -10,7 +10,7 @@ namespace TimeLines
 		/// <summary>
 		/// Начало периода - включительно
 		/// </summary>
-		DateTime Start { get; set; }
+		DateTime Begin { get; set; }
 
 		/// <summary>
 		/// Конец периода - исключительно

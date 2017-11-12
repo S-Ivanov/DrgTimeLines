@@ -30,7 +30,7 @@ namespace TimeLines
 			if (period == null)
 				throw new ArgumentNullException("period");
 
-			return period.End - period.Start;
+			return period.End - period.Begin;
 		}
 
 		/// <summary>
@@ -46,68 +46,67 @@ namespace TimeLines
 				throw new ArgumentNullException("period");
 			if (periods == null)
 				throw new ArgumentNullException("periods");
-            
-            if (copyPeriodFunc == null)
-                copyPeriodFunc = (source, newStart, newEnd) => source.CreateAnalogue(newStart, newEnd);
 
-			DateTime start = period.Start;
+            periods = periods.Where(p => p.Begin != p.End);
+            if (!periods.Any())
+                yield return period;
+
+            if (copyPeriodFunc == null)
+                copyPeriodFunc = (source, newBegin, newEnd) => source.CreateAnalogue(newBegin, newEnd);
+
+			DateTime begin = period.Begin;
 			foreach (var p in periods)
 			{
-				if (p.End <= period.Start) continue;
-				if (p.Start >= period.End) break;
+				if (p.End <= period.Begin) continue;
+				if (p.Begin >= period.End) break;
 
-				if (p.End > period.Start && p.Start < period.End && p.Start > start)
-                    yield return copyPeriodFunc(period, start, p.Start);
-				start = p.End;
+				if (p.End > period.Begin && p.Begin < period.End && p.Begin > begin)
+                    yield return copyPeriodFunc(period, begin, p.Begin);
+				begin = p.End;
 			}
 
-			if (start == period.Start)
+			if (begin == period.Begin)
 				yield return period;
-			else if (start < period.End)
-                yield return copyPeriodFunc(period, start, period.End);
+			else if (begin < period.End)
+                yield return copyPeriodFunc(period, begin, period.End);
 		}
 
 		/// <summary>
 		/// Создание периода, аналогичного исходному
 		/// </summary>
 		/// <param name="period">исходный период</param>
-		/// <param name="start">начало нового периода</param>
+		/// <param name="begin">начало нового периода</param>
 		/// <param name="end">конец нового периода</param>
 		/// <param name="copyDataFunc">функция копирования данных из исходного периода в периоды-результат</param>
 		/// <returns>период с заданными границами и данными, аналогичными исходному периоду</returns>
-		public static IPeriod CreateAnalogue(this IPeriod period, DateTime start, DateTime end, Action<IPeriod, IPeriod> copyDataFunc = null)
+		public static IPeriod CreateAnalogue(this IPeriod period, DateTime begin, DateTime end, Action<IPeriod, IPeriod> copyDataFunc = null)
 		{
 			if (period == null)
 				throw new ArgumentNullException("period");
-			if (start > end)
+			if (begin > end)
 				throw new ArgumentOutOfRangeException("start");
 
-			if (start == end)
-				return null;
+			IPeriod newPeriod;
+			if (period is ICloneable)
+				// создание копии исходного периода с помощью инетрфейса ICloneable
+				newPeriod = (period as ICloneable).Clone() as IPeriod;
 			else
 			{
-				IPeriod newPeriod;
-				if (period is ICloneable)
-					// создание копии исходного периода с помощью инетрфейса ICloneable
-					newPeriod = (period as ICloneable).Clone() as IPeriod;
-				else
-				{
-					// создание копии исходного периода с помощью рефлексии
-					Type periodType = period.GetType();
-					MethodInfo copyMethod = periodType.GetMethod("MemberwiseClone", BindingFlags.NonPublic | BindingFlags.Instance);
-					newPeriod = copyMethod.Invoke(period, null) as IPeriod;
-				}
-
-				// установка границ нового периода
-				newPeriod.Start = start;
-				newPeriod.End = end;
-
-				// копирование данных исходного периода
-				if (copyDataFunc != null)
-					copyDataFunc(period, newPeriod);
-				
-				return newPeriod;
+				// создание копии исходного периода с помощью рефлексии
+				Type periodType = period.GetType();
+				MethodInfo copyMethod = periodType.GetMethod("MemberwiseClone", BindingFlags.NonPublic | BindingFlags.Instance);
+				newPeriod = copyMethod.Invoke(period, null) as IPeriod;
 			}
+
+			// установка границ нового периода
+			newPeriod.Begin = begin;
+			newPeriod.End = end;
+
+			// копирование данных исходного периода
+			if (copyDataFunc != null)
+				copyDataFunc(period, newPeriod);
+				
+			return newPeriod;
 		}
 
 		/// <summary>
@@ -122,21 +121,21 @@ namespace TimeLines
 			if (period == null)
 				throw new ArgumentNullException("period");
 			if (copyPeriodFunc == null)
-				copyPeriodFunc = (p, start, end) => p.CreateAnalogue(start, end);
+				copyPeriodFunc = (p, begin, end) => p.CreateAnalogue(begin, end);
 
-            if (delta == TimeSpan.Zero || (period.Start == DateTime.MinValue && period.End == DateTime.MaxValue))
-                return copyPeriodFunc(period, period.Start, period.End);
+            if (delta == TimeSpan.Zero || (period.Begin == DateTime.MinValue && period.End == DateTime.MaxValue))
+                return copyPeriodFunc(period, period.Begin, period.End);
 
-			DateTime newPeriodStart = period.Start;
+			DateTime newPeriodBegin = period.Begin;
             DateTime newPeriodEnd = period.End;
             if (delta > TimeSpan.Zero)
             {
-                if (period.Start > DateTime.MaxValue - delta)
+                if (period.Begin > DateTime.MaxValue - delta)
                     return null;
                 else
                 {
-					if (newPeriodStart > DateTime.MinValue)
-						newPeriodStart += delta;
+					if (newPeriodBegin > DateTime.MinValue)
+						newPeriodBegin += delta;
                     if (period.End > DateTime.MaxValue - delta)
                         newPeriodEnd = DateTime.MaxValue;
                     else
@@ -149,15 +148,15 @@ namespace TimeLines
                     return null;
                 else
                 {
-                    if (period.Start < DateTime.MinValue - delta)
-						newPeriodStart = DateTime.MinValue;
+                    if (period.Begin < DateTime.MinValue - delta)
+						newPeriodBegin = DateTime.MinValue;
                     else
-						newPeriodStart += delta;
+						newPeriodBegin += delta;
                     if (newPeriodEnd < DateTime.MaxValue)
                         newPeriodEnd += delta;
                 }
             }
-			return newPeriodStart == newPeriodEnd ? null : copyPeriodFunc(period, newPeriodStart, newPeriodEnd);
+			return newPeriodBegin > newPeriodEnd ? null : copyPeriodFunc(period, newPeriodBegin, newPeriodEnd);
         }
 
         /// <summary>
@@ -169,18 +168,18 @@ namespace TimeLines
         {
             if (period == null)
                 throw new ArgumentNullException("period");
-            return Check(period.Start, period.End);
+            return Check(period.Begin, period.End);
         }
 
         /// <summary>
 		/// Проверка корректности границ периода
 		/// </summary>
-		/// <param name="start">начало периода</param>
+		/// <param name="begin">начало периода</param>
 		/// <param name="end">конец периода</param>
 		/// <returns></returns>
-		public static bool Check(DateTime start, DateTime end)
+		public static bool Check(DateTime begin, DateTime end)
 		{
-			return start < end;
+			return begin <= end;
 		}
 
 		/// <summary>
@@ -197,7 +196,7 @@ namespace TimeLines
 			if (other == null)
 				throw new ArgumentNullException("other");
 
-			if (period.Start == other.Start && period.End == other.End)
+			if (period.Begin == other.Begin && period.End == other.End)
 				return equalsDataFunc == null ? true : equalsDataFunc(period, other);
 			else
 				return false;
@@ -216,22 +215,23 @@ namespace TimeLines
 			if (other == null)
 				throw new ArgumentNullException("other");
 
-			return period.Intersected(other.Start, other.End);
+			return period.Intersected(other.Begin, other.End);
 		}
 
 		/// <summary>
 		/// Проверка пересечения периода с датами, эквивалентными границам другого периода
 		/// </summary>
 		/// <param name="period"></param>
-		/// <param name="start"></param>
+		/// <param name="begin"></param>
 		/// <param name="end"></param>
 		/// <returns></returns>
-		public static bool Intersected(this IPeriod period, DateTime start, DateTime end)
+		public static bool Intersected(this IPeriod period, DateTime begin, DateTime end)
 		{
 			if (period == null)
 				throw new ArgumentNullException("period");
 
-			return period.Contains(start, true, false) || period.Contains(end, false, false);
+			bool result = period.Contains(begin, true, false) || period.Contains(end, false, false);
+            return result;
 		}
 
 		/// <summary>
@@ -247,7 +247,10 @@ namespace TimeLines
 			if (period == null)
 				throw new ArgumentNullException("period");
 
-			return (includeBegin ? point >= period.Start : point > period.Start) && (includeEnd ? point <= period.End : point < period.End);
+            if (period.Begin == period.End && period.Begin == point)
+                return true;
+            else
+			    return (includeBegin ? point >= period.Begin : point > period.Begin) && (includeEnd ? point <= period.End : point < period.End);
 		}
 
 		/// <summary>
@@ -259,24 +262,41 @@ namespace TimeLines
 		/// <returns>true, если следующая точка пересечения найдена</returns>
 		public static bool GetNextPoint(IEnumerable<IPeriod> periods, DateTime? prevPoint, out DateTime nextPoint)
 		{
-			nextPoint = DateTime.MaxValue;
-			bool periodsEmpty = true;
-			foreach (var period in periods)
-			{
-				if (period == null)
-					continue;
-				else
-				{
-					periodsEmpty = false;
-					DateTime dt =
-						prevPoint == null ?
-						period.Start :
-						prevPoint.Value < period.Start ? period.Start : period.End;
-					if (dt < nextPoint)
-						nextPoint = dt;
-				}
-			}
-			return !periodsEmpty;
-		}
+            //nextPoint = DateTime.MaxValue;
+            //bool periodsEmpty = true;
+            //foreach (var period in periods)
+            //{
+            //	if (period == null)
+            //		continue;
+            //	else
+            //	{
+            //		periodsEmpty = false;
+            //		DateTime dt =
+            //			prevPoint == null ?
+            //			period.Start :
+            //			prevPoint.Value < period.Start ? period.Start : period.End;
+            //		if (dt < nextPoint)
+            //			nextPoint = dt;
+            //	}
+            //}
+            //return !periodsEmpty;
+
+            nextPoint = DateTime.MaxValue;
+            bool periodsNotEmpty = periods.Where(p => p != null).Any();
+            if (periodsNotEmpty)
+            {
+                if (prevPoint == null)
+                    nextPoint = periods.Where(p => p != null).SelectMany(p => new DateTime[] { p.Begin, p.End }).OrderBy(dt => dt).First();
+                else
+                {
+                    DateTime result = periods.Where(p => p != null).SelectMany(p => new DateTime[] { p.Begin, p.End }).OrderBy(dt => dt).FirstOrDefault(dt => dt > prevPoint.Value);
+                    if (result > prevPoint.Value)
+                        nextPoint = result;
+                    else
+                        return false;
+                }
+            }
+            return periodsNotEmpty;
+        }
 	}
 }

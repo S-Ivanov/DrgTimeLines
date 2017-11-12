@@ -74,7 +74,7 @@ namespace TimeLines
             if (!period.Check())
                 throw new ArgumentException("period");
 
-			int index = IndexForInsert(period.Start, period.End);
+			int index = IndexForInsert(period.Begin, period.End);
             if (index < 0)
                 throw new ArgumentOutOfRangeException("period");
             else
@@ -261,7 +261,7 @@ namespace TimeLines
                 throw new ArgumentException("period");
 
             DateTime minStart = periods.Count == 0 ? DateTime.MinValue : periods[periods.Count - 1].End;
-            if (!(minStart <= period.Start))
+            if (!(minStart <= period.Begin))
                 throw new ArgumentException("period");
 
             periods.Add(period);
@@ -302,7 +302,7 @@ namespace TimeLines
 			else
 			{
 				periods.RemoveAt(indexOfPeriod);
-				period.Start = newStart;
+				period.Begin = newStart;
 				period.End = newEnd;
 				periods.Insert(newIndex, period);
 			}
@@ -317,7 +317,7 @@ namespace TimeLines
 				this.dt = dt;
 			}
 
-			public DateTime Start
+			public DateTime Begin
 			{
 				get { return dt; }
 				set { dt = value; }
@@ -348,8 +348,8 @@ namespace TimeLines
 				if (!(y is PointPeriod))
 					throw new ArgumentException("y");
 
-				DateTime dt = y.Start;
-				if (x.Start <= dt && dt < x.End)
+				DateTime dt = y.Begin;
+				if (x.Begin <= dt && dt < x.End)
 				{
 					return 0;
 				}
@@ -375,8 +375,8 @@ namespace TimeLines
             if (period == null)
                 throw new ArgumentNullException("period");
 
-            bool ok = (previousPeriod == null ? DateTime.MinValue : previousPeriod.End) <= period.Start &&
-                period.End <= (nextPeriod == null ? DateTime.MaxValue : nextPeriod.Start);
+            bool ok = (previousPeriod == null ? DateTime.MinValue : previousPeriod.End) <= period.Begin &&
+                period.End <= (nextPeriod == null ? DateTime.MaxValue : nextPeriod.Begin);
 
             if (!ok)
                 throw new ArgumentOutOfRangeException("period");

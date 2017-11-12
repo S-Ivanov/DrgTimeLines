@@ -17,27 +17,32 @@ namespace TimeLines
 		/// <summary>
 		/// Конструктор
 		/// </summary>
-		/// <param name="start"></param>
+		/// <param name="begin"></param>
 		/// <param name="end"></param>
 		/// <param name="checkPeriod"></param>
-		public Period(DateTime start, DateTime end, bool checkPeriod = false)
+		public Period(DateTime begin, DateTime end, bool checkPeriod = false)
 		{
 			// проверить корректность границ периода
-			if (checkPeriod && !PeriodUtils.Check(start, end))
+			if (checkPeriod && !PeriodUtils.Check(begin, end))
 				throw new ArgumentException("start");
 
-			Start = start;
+			Begin = begin;
 			End = end;
 		}
 
         /// <summary>
         /// Конструктор
         /// </summary>
-        /// <param name="start"></param>
+        /// <param name="begin"></param>
         /// <param name="duration"></param>
         /// <param name="checkPeriod"></param>
-        public Period(DateTime start, TimeSpan duration, bool checkPeriod = false)
-            : this(start, start + duration, checkPeriod)
+        public Period(DateTime begin, TimeSpan duration, bool checkPeriod = false)
+            : this(begin, begin + duration, checkPeriod)
+        {
+        }
+
+        public Period(DateTime begin, bool checkPeriod = false)
+            : this(begin, begin, checkPeriod)
         {
         }
 
@@ -73,7 +78,7 @@ namespace TimeLines
 		/// <summary>
 		/// Начало периода - включительно
 		/// </summary>
-		public DateTime Start { get; set; }
+		public DateTime Begin { get; set; }
 
 		/// <summary>
 		/// Конец периода - исключительно
@@ -86,7 +91,7 @@ namespace TimeLines
 
 		public virtual object Clone()
 		{
-			return new Period(Start, End);
+			return new Period(Begin, End);
 		}
 
 		#endregion Реализация интерфейса IClonable
@@ -114,44 +119,49 @@ namespace TimeLines
 		/// <summary>
 		/// Конструктор
 		/// </summary>
-		/// <param name="start">начало периода - включительно</param>
+		/// <param name="begin">начало периода - включительно</param>
 		/// <param name="end">конец периода - исключительно</param>
 		/// <param name="data">ассоциированные с периодом данные</param>
-		public Period(DateTime start, DateTime end, T data)
-			: this(start, end, data, false)
+		public Period(DateTime begin, DateTime end, T data)
+			: this(begin, end, data, false)
 		{
 		}
 
 		/// <summary>
 		/// Конструктор
 		/// </summary>
-		/// <param name="start">начало периода - включительно</param>
+		/// <param name="begin">начало периода - включительно</param>
 		/// <param name="end">конец периода - исключительно</param>
 		/// <param name="data">ассоциированные с периодом данные</param>
 		/// <param name="checkPeriod"></param>
-		public Period(DateTime start, DateTime end, T data, bool checkPeriod)
-			: base(start, end, checkPeriod)
+		public Period(DateTime begin, DateTime end, T data, bool checkPeriod)
+			: base(begin, end, checkPeriod)
 		{
 			Data = data;
 		}
 
-		/// <summary>
-		/// Конструктор
-		/// </summary>
-		/// <param name="start">начало периода - включительно</param>
-		/// <param name="duration">длительность периода</param>
-		/// <param name="data">ассоциированные с периодом данные</param>
-		/// <param name="checkPeriod"></param>
-		public Period(DateTime start, TimeSpan duration, T data, bool checkPeriod = false)
-			: this(start, start + duration, data, checkPeriod)
-		{
-		}
+        /// <summary>
+        /// Конструктор
+        /// </summary>
+        /// <param name="begin">начало периода - включительно</param>
+        /// <param name="duration">длительность периода</param>
+        /// <param name="data">ассоциированные с периодом данные</param>
+        /// <param name="checkPeriod"></param>
+        public Period(DateTime begin, TimeSpan duration, T data, bool checkPeriod = false)
+            : this(begin, begin + duration, data, checkPeriod)
+        {
+        }
 
-		#region Реализация интерфейса IClonable
+        public Period(DateTime begin, T data, bool checkPeriod = false)
+            : this(begin, begin, data, checkPeriod)
+        {
+        }
 
-		public override object Clone()
+        #region Реализация интерфейса IClonable
+
+        public override object Clone()
 		{
-			return new Period<T>(Start, End, Data);
+			return new Period<T>(Begin, End, Data);
 		}
 
 		#endregion Реализация интерфейса IClonable

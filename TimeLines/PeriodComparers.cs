@@ -30,7 +30,7 @@ namespace TimeLines
 			if (y == null)
 				throw new ArgumentNullException("y");
 
-			int left = x.Start.CompareTo(y.Start);
+			int left = x.Begin.CompareTo(y.Begin);
 			if (left != 0)
 				return left;
 			else
@@ -48,7 +48,7 @@ namespace TimeLines
 
 		public int GetHashCode(IPeriod obj)
 		{
-			return (obj as IPeriod).Start.GetHashCode() ^ (obj as IPeriod).End.GetHashCode();
+			return (obj as IPeriod).Begin.GetHashCode() ^ (obj as IPeriod).End.GetHashCode();
 		}
 
 		#endregion Реализация интерфейса IEqualityComparer<IPeriod>
@@ -71,7 +71,7 @@ namespace TimeLines
 			if (y == null)
 				throw new ArgumentNullException("y");
 
-			return x.Start.CompareTo(y.Start);
+			return x.Begin.CompareTo(y.Begin);
 		}
 	}
 }

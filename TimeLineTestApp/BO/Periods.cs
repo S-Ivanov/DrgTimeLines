@@ -19,7 +19,7 @@ namespace TimeLineTestApp
 
 		public Period(IPeriod period)
 		{
-			start = period.Start;
+			start = period.Begin;
 			end = period.End;
 		}
 
@@ -27,14 +27,14 @@ namespace TimeLineTestApp
 		{
 			get
 			{
-				return Start;
+				return Begin;
 			}
 			set
 			{
 				if (value == null)
 					throw new ArgumentNullException("StartTime");
 				else
-					Start = value.Value;
+					Begin = value.Value;
 			}
 		}
 
@@ -53,7 +53,7 @@ namespace TimeLineTestApp
 			}
 		}
 
-		public DateTime Start 
+		public DateTime Begin 
 		{
 			get { return start; }
 			set
@@ -83,7 +83,7 @@ namespace TimeLineTestApp
 
         public TimeSpan Duration
         {
-            get { return End - Start; }
+            get { return End - Begin; }
         }
 
 		protected void OnPropertyChanged(string propertyName)
