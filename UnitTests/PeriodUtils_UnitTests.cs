@@ -11,7 +11,7 @@ namespace UnitTests
 		[TestMethod]
 		public void PeriodUtils_Subtraction_Test()
 		{
-			Period period = new Period(new DateTime(2015, 12, 02), new DateTime(2015, 12, 08));
+            Period period = new Period(new DateTime(2015, 12, 02), new DateTime(2015, 12, 08));
 			IPeriod[] actual = period.Subtraction(
 				new IPeriod[] 
 				{ 
@@ -46,9 +46,15 @@ namespace UnitTests
 			Assert.IsInstanceOfType(actual, typeof(Period<int>));
 		}
 
-		[TestMethod]
+        [TestMethod]
+        public void PeriodUtils_Intersected_Test()
+        {
+        }
+
+        [TestMethod]
         public void PeriodUtils_Shift_Test()
-		{
+        {
+            // TODO: проверить с событием
             Period period;
             TimeSpan delta;
             IPeriod actual;
@@ -126,7 +132,7 @@ namespace UnitTests
         [TestMethod]
 		public void PeriodUtils_Contains_Test()
 		{
-			Period period;
+            Period period;
 			DateTime point;
 			bool includeStart;
 			bool includeEnd;
@@ -166,19 +172,12 @@ namespace UnitTests
             includeEnd = true;
             res = PeriodUtils.Contains(period, point, includeStart, includeEnd);
             Assert.IsTrue(res);
-
-            period = new Period(new DateTime(2015, 12, 7), new DateTime(2015, 12, 7));
-            point = new DateTime(2015, 12, 7);
-            includeStart = true;
-            includeEnd = false;
-            res = PeriodUtils.Contains(period, point, includeStart, includeEnd);
-            Assert.IsTrue(res);
         }
 
         [TestMethod]
 		public void PeriodUtils_GetNextPoint_Test()
 		{
-			PrivateType privateType = new PrivateType(typeof(TimeLineUtils));
+            PrivateType privateType = new PrivateType(typeof(TimeLineUtils));
 
 			DateTime? prevPoint;
 			DateTime nextPoint;

@@ -179,7 +179,7 @@ namespace TimeLines
 		/// <returns></returns>
 		public static bool Check(DateTime begin, DateTime end)
 		{
-			return begin <= end;
+			return begin < end;
 		}
 
 		/// <summary>
@@ -247,10 +247,7 @@ namespace TimeLines
 			if (period == null)
 				throw new ArgumentNullException("period");
 
-            if (period.Begin == period.End && period.Begin == point)
-                return true;
-            else
-			    return (includeBegin ? point >= period.Begin : point > period.Begin) && (includeEnd ? point <= period.End : point < period.End);
+            return (includeBegin ? point >= period.Begin : point > period.Begin) && (includeEnd ? point <= period.End : point < period.End);
 		}
 
 		/// <summary>
@@ -289,6 +286,7 @@ namespace TimeLines
                     nextPoint = periods.Where(p => p != null).SelectMany(p => new DateTime[] { p.Begin, p.End }).OrderBy(dt => dt).First();
                 else
                 {
+                    // TODO: можно использовать бинарный поиск в массиве
                     DateTime result = periods.Where(p => p != null).SelectMany(p => new DateTime[] { p.Begin, p.End }).OrderBy(dt => dt).FirstOrDefault(dt => dt > prevPoint.Value);
                     if (result > prevPoint.Value)
                         nextPoint = result;

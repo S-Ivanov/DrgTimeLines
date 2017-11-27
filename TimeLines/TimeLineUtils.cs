@@ -307,7 +307,7 @@ namespace TimeLines
 			return Join(new IEnumerable<IPeriod>[] { first, second });
 		}
 
-        		/// <summary>
+        /// <summary>
         /// Объединение нескольких временных рядов
 		/// </summary>
 		/// <param name="timeLines">исходные временные ряды</param>
@@ -652,6 +652,7 @@ namespace TimeLines
                         if (buffer.Skip(1).Any(o => o != null && o.Intersected(begin, end)))
                             return (IPeriod)null;
                         else
+                            //return buffer[0].Begin == buffer[0].End ? copyPeriodFunc(buffer[0], buffer[0].Begin, buffer[0].Begin) : copyPeriodFunc(buffer[0], begin, end);
                             return copyPeriodFunc(buffer[0], begin, end);
                     },
                     checkBufferFunc: (begin, end, buffer) =>
